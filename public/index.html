@@ -1,89 +1,238 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro - Panadería</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <!-- Librería para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.0.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.0.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXELQXYUnBbbMKlRb1zjidKfSEjdpJNwg",
+            authDomain: "control-horarios-88c8e.firebaseapp.com",
+            projectId: "control-horarios-88c8e",
+            storageBucket: "control-horarios-88c8e.firebasestorage.app",
+            messagingSenderId: "487898475731",
+            appId: "1:487898475731:web:1e4b3b0d0f4004d95ef826",
+            measurementId: "G-E1TPXYMX74"
+        };
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
+        // Hacer las variables globales
+        window.db = db;
+        window.auth = auth;
+        window.Timestamp = Timestamp;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
     </script>
-  </body>
+    <script src="firebase-config.js"></script>
+    <script src="database.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥖 Sistema de Registro - Panadería</h1>
+            <p id="currentDateTime"></p>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="loginScreen" class="tab-content active">
+            <div class="login-form">
+                <h2 style="text-align: center; margin-bottom: 30px;">Iniciar Sesión</h2>
+                <div id="loginAlert"></div>
+                <div class="form-group">
+                    <label for="loginDocument">Documento de Identidad:</label>
+                    <input type="text" id="loginDocument" placeholder="Ingrese su documento">
+                </div>
+                <button onclick="login()" style="width: 100%;">Ingresar</button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="showAdminLogin()" style="background: #6c757d;">Administración</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login -->
+        <div id="adminLoginScreen" class="tab-content">
+            <div class="login-form">
+                <h2 style="text-align: center; margin-bottom: 30px;">Acceso Administrativo</h2>
+                <div id="adminLoginAlert"></div>
+                <div class="form-group">
+                    <label for="adminDocument">Documento de Identidad:</label>
+                    <input type="text" id="adminDocument" placeholder="Documento de administrador">
+                </div>
+                <button onclick="adminLogin()" style="width: 100%;">Ingresar como Admin</button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="showUserLogin()" style="background: #6c757d;">Volver a Usuario</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="userDashboard" class="tab-content">
+            <div class="user-info">
+                <h3>Bienvenido/a, <span id="userName"></span></h3>
+                <p><strong>Documento:</strong> <span id="userDocument"></span></p>
+                <p><strong>Estado:</strong> <span id="userStatus"></span></p>
+                <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+            </div>
+
+            <div class="current-session" id="currentSession" style="display: none;">
+                <h4>Sesión Actual</h4>
+                <p><strong>Inicio:</strong> <span id="sessionStart"></span></p>
+                <p><strong>Tiempo trabajado:</strong> <span id="workedTime">00:00:00</span></p>
+                <p><strong>Tiempo en break:</strong> <span id="breakTime">00:00:00</span></p>
+            </div>
+
+            <div class="time-controls">
+                <div class="control-card">
+                    <h4>Control de Turno</h4>
+                    <button id="startShiftBtn" onclick="startShift()" style="width: 100%; margin-bottom: 10px;">
+                        Comenzar Turno
+                    </button>
+                    <button id="endShiftBtn" onclick="endShift()" style="width: 100%; background: #dc3545;" disabled>
+                        Terminar Turno
+                    </button>
+                </div>
+
+                <div class="control-card">
+                    <h4>Descansos</h4>
+                    <button id="startBreakBtn" onclick="startBreak()" style="width: 100%; margin-bottom: 10px; background: #ffc107;" disabled>
+                        Iniciar Break
+                    </button>
+                    <button id="endBreakBtn" onclick="endBreak()" style="width: 100%; background: #28a745;" disabled>
+                        Terminar Break
+                    </button>
+                </div>
+
+                <div class="control-card">
+                    <h4>Evidencias</h4>
+                    <input type="file" id="evidenceInput" accept="image/*" multiple style="margin-bottom: 10px;">
+                    <textarea id="evidenceNote" placeholder="Nota sobre la evidencia (opcional)" rows="3"></textarea>
+                    <button onclick="uploadEvidence()" style="width: 100%; background: #17a2b8;">
+                        Subir Evidencia
+                    </button>
+                </div>
+            </div>
+
+            <div id="evidencePreview" class="evidence-preview"></div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="tab-content">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showAdminTab('users')">Usuarios</button>
+                <button class="nav-tab" onclick="showAdminTab('reports')">Reportes</button>
+                <button class="nav-tab" onclick="showAdminTab('evidence')">Evidencias</button>
+            </div>
+
+            <div class="user-info">
+                <h3>Panel Administrativo - <span id="adminName"></span></h3>
+                <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="usersTab" class="admin-tab-content">
+                <div class="admin-form" style="max-width: 600px;">
+                    <h3>Registrar Nuevo Usuario</h3>
+                    <div id="userAlert"></div>
+                    <div class="form-group">
+                        <label for="newUserName">Nombre Completo:</label>
+                        <input type="text" id="newUserName" placeholder="Nombre completo del empleado">
+                    </div>
+                    <div class="form-group">
+                        <label for="newUserDocument">Documento de Identidad:</label>
+                        <input type="text" id="newUserDocument" placeholder="Número de documento">
+                    </div>
+                    <div class="form-group">
+                        <label for="newUserType">Tipo de Usuario:</label>
+                        <select id="newUserType">
+                            <option value="empleado">Empleado</option>
+                            <option value="admin">Administrador</option>
+                            <option value="super_admin">Super Administrador</option>
+                        </select>
+                    </div>
+                    <button onclick="createUser()" style="width: 100%;">Crear Usuario</button>
+                </div>
+
+                <div class="user-list" id="userList"></div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reportsTab" class="admin-tab-content hidden">
+                <div class="filter-controls">
+                    <div class="form-group">
+                        <label for="filterUser">Filtrar por Usuario:</label>
+                        <select id="filterUser">
+                            <option value="">Todos los usuarios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterDate">Filtrar por Fecha:</label>
+                        <input type="date" id="filterDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterDateRange">Rango de Fechas:</label>
+                        <input type="date" id="filterStartDate" placeholder="Fecha inicio">
+                        <input type="date" id="filterEndDate" placeholder="Fecha fin" style="margin-top: 10px;">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: end;">
+                        <button onclick="filterRecords()">Filtrar</button>
+                        <button onclick="exportToExcel()" style="background: #28a745;">Exportar Excel</button>
+                    </div>
+                </div>
+
+                <table class="records-table" id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Documento</th>
+                            <th>Fecha</th>
+                            <th>Inicio Turno</th>
+                            <th>Fin Turno</th>
+                            <th>Horas Trabajadas</th>
+                            <th>Tiempo Break</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Evidence Tab -->
+            <div id="evidenceTab" class="admin-tab-content hidden">
+                <h3>Evidencias Subidas</h3>
+                <div id="evidenceList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
