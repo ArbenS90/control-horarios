@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Collection: users
+    match /users/{userId} {
+      // Allow authenticated users to create their own document
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow authenticated users to read/write their own document
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      
+      // Super-Admin can read all users
+      allow read: if request.auth != null 
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super-Admin';
+    }
+
+    // Collection: timeRecords
+    match /timeRecords/{documentId} {
+      // Users can read their own records
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Users can create records with their userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // Users can update their own records
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Super-Admin can read all records
+      allow read: if request.auth != null 
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super-Admin';
+    }
+
+    // Collection: roles
+    match /roles/{roleId} {
+      // Anyone can read roles
+      allow read: if true;
+      
+      // Only Super-Admin can write roles
+      allow write: if request.auth != null 
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super-Admin';
+    }
+  }
+}

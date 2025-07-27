@@ -1,0 +1,89 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Super-Admin - Panadería Salon Familiar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-center mb-4">Configuración de Super-Admin</h1>
+        <p class="text-center text-gray-600 mb-4">Ingresa los datos para crear el primer Super-Admin del sistema.</p>
+        <div class="space-y-4">
+            <div>
+                <label for="cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
+                <input id="cedula" type="text" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                <input id="password" type="password" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+            </div>
+            <button id="create-admin-btn" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Crear Super-Admin</button>
+            <p id="error-message" class="hidden text-red-600 text-center"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsDBEeY-yLocPBYVebaoOPEWslGeWAKvQ",
+            authDomain: "salon-familiar.firebaseapp.com",
+            projectId: "salon-familiar",
+            storageBucket: "salon-familiar.firebasestorage.app",
+            messagingSenderId: "455766051762",
+            appId: "1:455766051762:web:db849ec134c0ec729fb2ab"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Elementos del DOM
+        const createAdminBtn = document.getElementById('create-admin-btn');
+        const cedulaInput = document.getElementById('cedula');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+
+        // Crear Super-Admin
+        createAdminBtn.addEventListener('click', async () => {
+            const email = cedulaInput.value + '@panaderia.com';
+            const password = passwordInput.value;
+
+            // Validar entrada
+            if (!cedulaInput.value || !passwordInput.value) {
+                errorMessage.textContent = 'Por favor, completa todos los campos.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Crear usuario en Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userId = userCredential.user.uid;
+
+                // Crear documento en Firestore
+                await setDoc(doc(db, 'users', userId), {
+                    cedula: cedulaInput.value,
+                    role: 'Super-Admin',
+                    email: email,
+                    userId: userId
+                });
+
+                alert('Super-Admin creado correctamente');
+                window.location.href = '/index.html';
+            } catch (error) {
+                errorMessage.textContent = `Error al crear Super-Admin: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+```
