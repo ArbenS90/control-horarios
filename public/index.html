@@ -6,322 +6,700 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro - Panadería Salon Familiar</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css?v=4" disabled>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-        <div class="flex items-center justify-center mb-4">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-6 bg-white rounded-lg shadow-lg w-full max-w-md">
+        <div class="header flex items-center justify-center mb-6">
             <span class="text-3xl">🥖</span>
             <h1 class="text-2xl font-bold text-center ml-2">Panadería Salon Familiar</h1>
         </div>
 
-        <!-- Loading state -->
-        <div id="loading" class="hidden text-center text-gray-500">Cargando...</div>
+        <div id="loading" class="text-center text-gray-500">Cargando...</div>
 
-        <!-- Login Form -->
-        <div id="login-section" class="space-y-4">
-            <h2 class="text-xl font-semibold text-center">Ingresar al Sistema</h2>
+        <div id="login-section" class="hidden">
+            <h2 class="text-xl font-semibold text-center mb-4">Ingresar al Sistema</h2>
             <div class="space-y-4">
                 <div>
                     <label for="cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
-                    <input id="cedula" type="text" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                    <input id="cedula" type="text" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <input id="password" type="password" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
+                    <input id="password" type="password" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
                 </div>
-                <button id="login-btn" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Ingresar</button>
+                <button id="login-btn" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Ingresar</button>
                 <p id="error-message" class="hidden text-red-600 text-center"></p>
             </div>
         </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="hidden space-y-4">
-            <div class="flex space-x-4">
-                <button id="check-in-btn" class="flex-1 p-2 bg-green-600 text-white rounded-md hover:bg-green-700">📥 Marcar Entrada</button>
-                <button id="check-out-btn" class="flex-1 p-2 bg-red-600 text-white rounded-md hover:bg-red-700">📤 Marcar Salida</button>
+        <div id="user-dashboard" class="hidden">
+            <h2 id="welcome-message" class="text-xl font-semibold text-center mb-4"></h2>
+            <div class="text-center mb-4">
+                <h2 class="text-lg font-medium">Hora Actual (Colombia)</h2>
+                <div id="current-time" class="text-2xl font-bold text-blue-600"></div>
             </div>
-            <button id="view-records-btn" class="w-full p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Ver Mis Registros</button>
-            <button id="super-admin-btn" class="hidden w-full p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">Administración (Super-Admin)</button>
-            <button id="logout-btn" class="w-full p-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">Cerrar Sesión</button>
-
-            <!-- Records Section -->
-            <div id="records-section" class="hidden">
-                <h2 class="text-xl font-semibold text-center">Mis Registros</h2>
-                <div id="records-list" class="mt-4 space-y-2"></div>
+            <div id="work-time-section" class="hidden">
+                <h3 class="text-lg font-medium text-center mb-2">Tiempo Trabajado</h3>
+                <div id="work-time" class="text-xl font-bold text-green-600 text-center"></div>
+            </div>
+            <button id="check-btn" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 mb-4">Marcar Entrada</button>
+            <div class="space-y-4">
+                <div>
+                    <label for="user-start-date" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                    <input id="user-start-date" type="date" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300">
+                </div>
+                <div>
+                    <label for="user-end-date" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                    <input id="user-end-date" type="date" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300">
+                </div>
+                <button id="user-filter-records-btn" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Filtrar</button>
+            </div>
+            <button id="view-records-btn" class="w-full bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 mt-4">Ver Mis Registros</button>
+            <button id="logout-btn" class="w-full bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 mt-2">Cerrar Sesión</button>
+            <div id="records-section" class="hidden mt-4">
+                <h2 class="text-xl font-semibold text-center mb-4">Mis Registros</h2>
+                <div id="records-list" class="max-h-64 overflow-y-auto"></div>
             </div>
         </div>
 
-        <!-- Super-Admin Modal -->
-        <div id="super-admin-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-                <h2 class="text-xl font-semibold mb-4">Panel de Super-Admin</h2>
+        <div id="super-admin-dashboard" class="hidden">
+            <div class="text-center mb-4">
+                <h2 id="super-admin-welcome-message" class="text-xl font-semibold"></h2>
+            </div>
+            <div class="flex flex-col space-y-2 mb-4 md:flex-row md:space-y-0 md:space-x-2">
+                <button id="tab-register" class="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Registrar Usuario</button>
+                <button id="tab-users" class="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600">Lista de Usuarios</button>
+                <button id="tab-records" class="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600">Registros</button>
+            </div>
+            <div id="panel-register" class="space-y-4">
+                <h2 class="text-xl font-semibold text-center mb-4">Registrar Nuevo Usuario</h2>
                 <div class="space-y-4">
-                    <!-- Register User Form -->
                     <div>
-                        <h3 class="text-lg font-medium">Registrar Nuevo Usuario</h3>
-                        <div class="space-y-2">
-                            <div>
-                                <label for="new-cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
-                                <input id="new-cedula" type="text" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
-                            </div>
-                            <div>
-                                <label for="new-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                                <input id="new-password" type="password" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300" required>
-                            </div>
-                            <div>
-                                <label for="new-rol" class="block text-sm font-medium text-gray-700">Rol</label>
-                                <select id="new-rol" class="mt-1 w-full p-2 border rounded-md focus:ring focus:ring-blue-300">
-                                    <option value="Admin">Admin</option>
-                                    <option value="Empleado">Empleado</option>
-                                </select>
-                            </div>
-                            <button id="register-user-btn" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Registrar Usuario</button>
-                        </div>
+                        <label for="new-full-name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                        <input id="new-full-name" type="text" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
                     </div>
-
-                    <!-- All Records Section -->
                     <div>
-                        <h3 class="text-lg font-medium">Registros de Todos los Usuarios</h3>
-                        <div id="all-records-list" class="mt-2 max-h-64 overflow-y-auto space-y-2"></div>
+                        <label for="new-cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
+                        <input id="new-cedula" type="text" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
                     </div>
-
-                    <button id="close-modal-btn" class="w-full p-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">Cerrar</button>
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <input id="new-password" type="password" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
+                    </div>
+                    <div>
+                        <label for="new-start-date" class="block text-sm font-medium text-gray-700">Fecha de Ingreso</label>
+                        <input id="new-start-date" type="date" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" required>
+                    </div>
+                    <div>
+                        <label for="new-rol" class="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
+                        <select id="new-rol" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300">
+                            <option value="Admin">Admin</option>
+                            <option value="Empleado">Empleado</option>
+                        </select>
+                    </div>
+                    <button id="register-user-btn" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Registrar</button>
+                    <p id="register-error-message" class="hidden text-red-600 text-center"></p>
                 </div>
             </div>
+            <div id="panel-users" class="hidden space-y-4">
+                <h2 class="text-xl font-semibold text-center mb-4">Lista de Usuarios</h2>
+                <div id="users-list" class="max-h-64 overflow-y-auto"></div>
+            </div>
+            <div id="panel-records" class="hidden space-y-4">
+                <h2 class="text-xl font-semibold text-center mb-4">Registros de Todos los Usuarios</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="start-date" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                        <input id="start-date" type="date" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300">
+                    </div>
+                    <div>
+                        <label for="end-date" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                        <input id="end-date" type="date" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300">
+                    </div>
+                    <button id="filter-records-btn" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Filtrar</button>
+                </div>
+                <button id="export-records-btn" class="w-full bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 mt-2">Exportar a Excel</button>
+                <div id="all-records-list" class="max-h-64 overflow-y-auto"></div>
+            </div>
+            <div class="text-center mt-4">
+                <button id="super-admin-logout-btn" class="w-full bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600">Cerrar Sesión</button>
+            </div>
         </div>
-    </div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-        import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, limit, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+            import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+            import { getFirestore, collection, addDoc, updateDoc, doc, query, where, orderBy, limit, getDocs, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAsDBEeY-yLocPBYVebaoOPEWslGeWAKvQ",
-            authDomain: "salon-familiar.firebaseapp.com",
-            projectId: "salon-familiar",
-            storageBucket: "salon-familiar.firebasestorage.app",
-            messagingSenderId: "455766051762",
-            appId: "1:455766051762:web:db849ec134c0ec729fb2ab"
-        };
+            const firebaseConfig = {
+                apiKey: "AIzaSyAsDBEeY-yLocPBYVebaoOPEWslGeWAKvQ",
+                authDomain: "salon-familiar.firebaseapp.com",
+                projectId: "salon-familiar",
+                storageBucket: "salon-familiar.firebasestorage.app",
+                messagingSenderId: "455766051762",
+                appId: "1:455766051762:web:db849ec134c0ec729fb2ab"
+            };
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-        // Elementos del DOM
-        const loginSection = document.getElementById('login-section');
-        const dashboard = document.getElementById('dashboard');
-        const recordsSection = document.getElementById('records-section');
-        const recordsList = document.getElementById('records-list');
-        const loading = document.getElementById('loading');
-        const loginBtn = document.getElementById('login-btn');
-        const checkInBtn = document.getElementById('check-in-btn');
-        const checkOutBtn = document.getElementById('check-out-btn');
-        const viewRecordsBtn = document.getElementById('view-records-btn');
-        const superAdminBtn = document.getElementById('super-admin-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const cedulaInput = document.getElementById('cedula');
-        const passwordInput = document.getElementById('password');
-        const errorMessage = document.getElementById('error-message');
-        const superAdminModal = document.getElementById('super-admin-modal');
-        const registerUserBtn = document.getElementById('register-user-btn');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const newCedulaInput = document.getElementById('new-cedula');
-        const newPasswordInput = document.getElementById('new-password');
-        const newRolSelect = document.getElementById('new-rol');
-        const allRecordsList = document.getElementById('all-records-list');
+            const elements = {
+                loading: document.getElementById('loading'),
+                loginSection: document.getElementById('login-section'),
+                userDashboard: document.getElementById('user-dashboard'),
+                superAdminDashboard: document.getElementById('super-admin-dashboard'),
+                recordsSection: document.getElementById('records-section'),
+                recordsList: document.getElementById('records-list'),
+                usersList: document.getElementById('users-list'),
+                allRecordsList: document.getElementById('all-records-list'),
+                loginBtn: document.getElementById('login-btn'),
+                checkBtn: document.getElementById('check-btn'),
+                viewRecordsBtn: document.getElementById('view-records-btn'),
+                logoutBtn: document.getElementById('logout-btn'),
+                superAdminLogoutBtn: document.getElementById('super-admin-logout-btn'),
+                cedulaInput: document.getElementById('cedula'),
+                passwordInput: document.getElementById('password'),
+                errorMessage: document.getElementById('error-message'),
+                tabRegister: document.getElementById('tab-register'),
+                tabUsers: document.getElementById('tab-users'),
+                tabRecords: document.getElementById('tab-records'),
+                panelRegister: document.getElementById('panel-register'),
+                panelUsers: document.getElementById('panel-users'),
+                panelRecords: document.getElementById('panel-records'),
+                newFullNameInput: document.getElementById('new-full-name'),
+                newCedulaInput: document.getElementById('new-cedula'),
+                newPasswordInput: document.getElementById('new-password'),
+                newStartDateInput: document.getElementById('new-start-date'),
+                newRolSelect: document.getElementById('new-rol'),
+                registerUserBtn: document.getElementById('register-user-btn'),
+                startDateInput: document.getElementById('start-date'),
+                endDateInput: document.getElementById('end-date'),
+                userStartDateInput: document.getElementById('user-start-date'),
+                userEndDateInput: document.getElementById('user-end-date'),
+                userFilterRecordsBtn: document.getElementById('user-filter-records-btn'),
+                filterRecordsBtn: document.getElementById('filter-records-btn'),
+                exportRecordsBtn: document.getElementById('export-records-btn'),
+                currentTimeDisplay: document.getElementById('current-time'),
+                workTimeSection: document.getElementById('work-time-section'),
+                workTimeDisplay: document.getElementById('work-time'),
+                welcomeMessage: document.getElementById('welcome-message'),
+                superAdminWelcomeMessage: document.getElementById('super-admin-welcome-message'),
+                registerErrorMessage: document.getElementById('register-error-message')
+            };
 
-        // Verificar estado de autenticación y rol
-        onAuthStateChanged(auth, async user => {
-            if (user) {
-                loginSection.classList.add('hidden');
-                dashboard.classList.remove('hidden');
-                loading.classList.add('hidden');
-
-                // Obtener el rol del usuario
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists() && userDoc.data().role === 'Super-Admin') {
-                    superAdminBtn.classList.remove('hidden');
+            function initializeElements() {
+                if (!elements.loading || !elements.loginSection || !elements.userDashboard || !elements.superAdminDashboard ||
+                    !elements.recordsSection || !elements.recordsList || !elements.usersList || !elements.allRecordsList ||
+                    !elements.loginBtn || !elements.checkBtn || !elements.viewRecordsBtn || !elements.logoutBtn ||
+                    !elements.superAdminLogoutBtn || !elements.cedulaInput || !elements.passwordInput || !elements.errorMessage ||
+                    !elements.tabRegister || !elements.tabUsers || !elements.tabRecords || !elements.panelRegister ||
+                    !elements.panelUsers || !elements.panelRecords || !elements.newFullNameInput || !elements.newCedulaInput ||
+                    !elements.newPasswordInput || !elements.newStartDateInput || !elements.newRolSelect || !elements.registerUserBtn ||
+                    !elements.startDateInput || !elements.endDateInput || !elements.userStartDateInput || !elements.userEndDateInput ||
+                    !elements.userFilterRecordsBtn || !elements.filterRecordsBtn || !elements.exportRecordsBtn ||
+                    !elements.currentTimeDisplay || !elements.workTimeSection || !elements.workTimeDisplay ||
+                    !elements.welcomeMessage || !elements.superAdminWelcomeMessage || !elements.registerErrorMessage) {
+                    console.error('Uno o más elementos del DOM no se encontraron:', elements);
+                    return false;
                 }
-            } else {
-                loginSection.classList.remove('hidden');
-                dashboard.classList.add('hidden');
-                recordsSection.classList.add('hidden');
-                superAdminModal.classList.add('hidden');
-                loading.classList.add('hidden');
-            }
-        });
-
-        // Iniciar sesión
-        loginBtn.addEventListener('click', async () => {
-            const email = cedulaInput.value + '@panaderia.com';
-            const password = passwordInput.value;
-
-            if (!cedulaInput.value || !passwordInput.value) {
-                errorMessage.textContent = 'Por favor, completa todos los campos.';
-                errorMessage.classList.remove('hidden');
-                return;
+                return true;
             }
 
-            try {
-                loading.classList.remove('hidden');
-                await signInWithEmailAndPassword(auth, email, password);
-                errorMessage.classList.add('hidden');
-            } catch (error) {
-                loading.classList.add('hidden');
-                errorMessage.textContent = `Error al iniciar sesión: ${error.message}`;
-                errorMessage.classList.remove('hidden');
-            }
-        });
+            let currentRecords = [];
+            let activeCheckInDoc = null;
 
-        // Marcar entrada
-        checkInBtn.addEventListener('click', async () => {
-            try {
-                loading.classList.remove('hidden');
-                await addDoc(collection(db, 'timeRecords'), {
-                    userId: auth.currentUser.uid,
-                    checkIn: new Date(),
-                    checkOut: null
+            function updateCurrentTime() {
+                const now = new Date();
+                const colombiaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+                if (elements.currentTimeDisplay) elements.currentTimeDisplay.textContent = colombiaTime.toLocaleTimeString('es-CO', { hour12: false });
+            }
+            setInterval(updateCurrentTime, 1000);
+            updateCurrentTime();
+
+            function updateWorkTime(checkInTime) {
+                if (!checkInTime || !elements.workTimeSection || !elements.workTimeDisplay) {
+                    if (elements.workTimeSection) elements.workTimeSection.classList.add('hidden');
+                    return;
+                }
+                elements.workTimeSection.classList.remove('hidden');
+                const interval = setInterval(() => {
+                    if (!activeCheckInDoc) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    const now = new Date();
+                    const diffMs = now - (checkInTime.toDate ? checkInTime.toDate() : checkInTime);
+                    const hours = Math.floor(diffMs / 3600000);
+                    const minutes = Math.floor((diffMs % 3600000) / 60000);
+                    const seconds = Math.floor((diffMs % 60000) / 1000);
+                    if (elements.workTimeDisplay) elements.workTimeDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            function calculateTenure(startDate) {
+                const now = new Date();
+                const start = startDate.toDate ? startDate.toDate() : new Date(startDate);
+                let years = now.getFullYear() - start.getFullYear();
+                let months = now.getMonth() - start.getMonth();
+                let days = now.getDate() - start.getDate();
+
+                if (days < 0) {
+                    months--;
+                    days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+                }
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                if (years < 0) {
+                    years = 0;
+                    months = 0;
+                    days = 0;
+                }
+
+                return `${years} años, ${months} meses, ${days} días`;
+            }
+
+            function setVisibility(section, isVisible) {
+                if (section) section.classList.toggle('hidden', !isVisible);
+            }
+
+            function setActiveTab(tabId) {
+                if (!elements.tabRegister || !elements.tabUsers || !elements.tabRecords || !elements.panelRegister ||
+                    !elements.panelUsers || !elements.panelRecords) {
+                    console.error('Elementos de pestañas no encontrados');
+                    return;
+                }
+
+                [elements.tabRegister, elements.tabUsers, elements.tabRecords].forEach(btn => {
+                    if (btn) {
+                        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-gray-500', 'hover:bg-gray-600');
+                        btn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    }
                 });
-                alert('Entrada marcada correctamente');
-            } catch (error) {
-                alert('Error al marcar entrada: ' + error.message);
-            } finally {
-                loading.classList.add('hidden');
+                [elements.panelRegister, elements.panelUsers, elements.panelRecords].forEach(panel => {
+                    if (panel) panel.classList.add('hidden');
+                });
+
+                const tab = document.getElementById(tabId);
+                const panel = document.getElementById(`panel-${tabId}`);
+                if (tab && panel) {
+                    tab.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    tab.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    panel.classList.remove('hidden');
+
+                    if (tabId === 'users' && elements.usersList) {
+                        loadUsers();
+                    } else if (tabId === 'records' && elements.allRecordsList) {
+                        loadAllRecords();
+                    }
+                }
             }
-        });
 
-        // Marcar salida
-        checkOutBtn.addEventListener('click', async () => {
-            try {
-                loading.classList.remove('hidden');
-                const q = query(
-                    collection(db, 'timeRecords'),
-                    where('userId', '==', auth.currentUser.uid),
-                    where('checkOut', '==', null),
-                    orderBy('checkIn', 'desc'),
-                    limit(1)
-                );
-                const querySnapshot = await getDocs(q);
+            function initializeUI() {
+                setVisibility(elements.loading, true);
+                setVisibility(elements.loginSection, false);
+                setVisibility(elements.userDashboard, false);
+                setVisibility(elements.superAdminDashboard, false);
+                setVisibility(elements.recordsSection, false);
+                setVisibility(elements.workTimeSection, false);
+                if (elements.welcomeMessage) elements.welcomeMessage.textContent = '';
+                if (elements.superAdminWelcomeMessage) elements.superAdminWelcomeMessage.textContent = '';
+                if (elements.recordsList) elements.recordsList.innerHTML = '';
+                if (elements.usersList) elements.usersList.innerHTML = '';
+                if (elements.allRecordsList) elements.allRecordsList.innerHTML = '';
+                currentRecords = [];
+            }
 
-                if (!querySnapshot.empty) {
-                    const docRef = doc(db, 'timeRecords', querySnapshot.docs[0].id);
-                    await updateDoc(docRef, {
-                        checkOut: new Date()
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!initializeElements()) {
+                    console.error('Inicialización fallida debido a elementos faltantes.');
+                    return;
+                }
+
+                initializeUI();
+                elements.loading.classList.remove('hidden');
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            initializeUI();
+                            if (userData.role === 'Super-Admin') {
+                                setVisibility(elements.superAdminDashboard, true);
+                                if (elements.superAdminWelcomeMessage) elements.superAdminWelcomeMessage.textContent = `Bienvenido, ${userData.fullName || 'Super-Admin'}`;
+                                setActiveTab('register');
+                            } else {
+                                setVisibility(elements.userDashboard, true);
+                                if (elements.welcomeMessage) elements.welcomeMessage.textContent = `Bienvenido, ${userData.fullName || 'Usuario'}`;
+                                await checkActiveCheckIn();
+                            }
+                        }
+                    } else {
+                        initializeUI();
+                        setVisibility(elements.loginSection, true);
+                    }
+                    elements.loading.classList.add('hidden');
+                });
+
+                if (elements.tabRegister) elements.tabRegister.addEventListener('click', () => setActiveTab('register'));
+                if (elements.tabUsers) elements.tabUsers.addEventListener('click', () => setActiveTab('users'));
+                if (elements.tabRecords) elements.tabRecords.addEventListener('click', () => setActiveTab('records'));
+
+                if (elements.registerUserBtn) {
+                    elements.registerUserBtn.addEventListener('click', async () => {
+                        const fullName = elements.newFullNameInput ? elements.newFullNameInput.value.trim() : '';
+                        const cedula = elements.newCedulaInput ? elements.newCedulaInput.value.trim() : '';
+                        const password = elements.newPasswordInput ? elements.newPasswordInput.value.trim() : '';
+                        const startDate = elements.newStartDateInput ? (elements.newStartDateInput.value ? new Date(elements.newStartDateInput.value) : null) : null;
+                        const role = elements.newRolSelect ? elements.newRolSelect.value : 'Empleado';
+                        const email = `${cedula}@panaderia.com`;
+
+                        if (!fullName || !cedula || !password || !startDate) {
+                            if (elements.registerErrorMessage) {
+                                elements.registerErrorMessage.textContent = 'Por favor, completa todos los campos.';
+                                elements.registerErrorMessage.classList.remove('hidden');
+                            }
+                            return;
+                        }
+
+                        if (!/^\d+$/.test(cedula)) {
+                            if (elements.registerErrorMessage) {
+                                elements.registerErrorMessage.textContent = 'La cédula debe contener solo números.';
+                                elements.registerErrorMessage.classList.remove('hidden');
+                            }
+                            return;
+                        }
+
+                        if (password.length < 6) {
+                            if (elements.registerErrorMessage) {
+                                elements.registerErrorMessage.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                                elements.registerErrorMessage.classList.remove('hidden');
+                            }
+                            return;
+                        }
+
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            if (elements.registerErrorMessage) {
+                                elements.registerErrorMessage.textContent = 'El email generado no es válido.';
+                                elements.registerErrorMessage.classList.remove('hidden');
+                            }
+                            return;
+                        }
+
+                        try {
+                            if (elements.loading) elements.loading.classList.remove('hidden');
+                            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                                fullName, cedula, role, email, startDate, userId: userCredential.user.uid
+                            });
+                            if (elements.registerErrorMessage) elements.registerErrorMessage.classList.add('hidden');
+                            alert('Usuario registrado correctamente');
+                            if (elements.newFullNameInput) elements.newFullNameInput.value = '';
+                            if (elements.newCedulaInput) elements.newCedulaInput.value = '';
+                            if (elements.newPasswordInput) elements.newPasswordInput.value = '';
+                            if (elements.newStartDateInput) elements.newStartDateInput.value = '';
+                            if (elements.usersList) loadUsers();
+                        } catch (error) {
+                            if (elements.loading) elements.loading.classList.add('hidden');
+                            if (elements.registerErrorMessage) {
+                                elements.registerErrorMessage.textContent = `Error al registrar usuario: ${error.message}`;
+                                elements.registerErrorMessage.classList.remove('hidden');
+                            }
+                            console.error('Error de registro:', error);
+                        }
                     });
-                    alert('Salida marcada correctamente');
-                } else {
-                    alert('No hay entrada activa para marcar salida');
                 }
-            } catch (error) {
-                alert('Error al marcar salida: ' + error.message);
-            } finally {
-                loading.classList.add('hidden');
-            }
-        });
+            });
 
-        // Ver registros del usuario
-        viewRecordsBtn.addEventListener('click', async () => {
-            try {
-                loading.classList.remove('hidden');
-                recordsSection.classList.remove('hidden');
-                recordsList.innerHTML = '';
-
-                const q = query(
-                    collection(db, 'timeRecords'),
-                    where('userId', '==', auth.currentUser.uid),
-                    orderBy('checkIn', 'desc'),
-                    limit(10)
-                );
-                const querySnapshot = await getDocs(q);
-
-                querySnapshot.forEach(docSnapshot => {
-                    const data = docSnapshot.data();
-                    const checkIn = data.checkIn ? data.checkIn.toDate().toLocaleString() : 'N/A';
-                    const checkOut = data.checkOut ? data.checkOut.toDate().toLocaleString() : 'N/A';
-                    const li = document.createElement('div');
-                    li.className = 'p-2 bg-gray-100 rounded-md';
-                    li.innerHTML = `<strong>Entrada:</strong> ${checkIn}<br><strong>Salida:</strong> ${checkOut}`;
-                    recordsList.appendChild(li);
-                });
-            } catch (error) {
-                alert('Error al cargar registros: ' + error.message);
-            } finally {
-                loading.classList.add('hidden');
-            }
-        });
-
-        // Abrir modal de Super-Admin
-        superAdminBtn.addEventListener('click', async () => {
-            superAdminModal.classList.remove('hidden');
-            // Cargar todos los registros
-            try {
-                allRecordsList.innerHTML = '';
-                const q = query(collection(db, 'timeRecords'), orderBy('checkIn', 'desc'));
-                const querySnapshot = await getDocs(q);
-
-                for (const docSnapshot of querySnapshot.docs) {
-                    const data = docSnapshot.data();
-                    const userDoc = await getDoc(doc(db, 'users', data.userId));
-                    const userCedula = userDoc.exists() ? userDoc.data().cedula : 'Desconocido';
-                    const checkIn = data.checkIn ? data.checkIn.toDate().toLocaleString() : 'N/A';
-                    const checkOut = data.checkOut ? data.checkOut.toDate().toLocaleString() : 'N/A';
-                    const li = document.createElement('div');
-                    li.className = 'p-2 bg-gray-100 rounded-md';
-                    li.innerHTML = `<strong>Cédula:</strong> ${userCedula}<br><strong>Entrada:</strong> ${checkIn}<br><strong>Salida:</strong> ${checkOut}`;
-                    allRecordsList.appendChild(li);
+            async function checkActiveCheckIn() {
+                try {
+                    if (!elements.checkBtn || !elements.workTimeSection) return;
+                    const q = query(collection(db, 'timeRecords'), where('userId', '==', auth.currentUser.uid), where('checkOut', '==', null), orderBy('checkIn', 'desc'), limit(1));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        activeCheckInDoc = querySnapshot.docs[0];
+                        elements.checkBtn.textContent = 'Marcar Salida';
+                        elements.checkBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        elements.checkBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                        updateWorkTime(activeCheckInDoc.data().checkIn);
+                    } else {
+                        activeCheckInDoc = null;
+                        elements.checkBtn.textContent = 'Marcar Entrada';
+                        elements.checkBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                        elements.checkBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        setVisibility(elements.workTimeSection, false);
+                    }
+                } catch (error) {
+                    alert('Error al verificar entrada activa: ' + error.message);
                 }
-            } catch (error) {
-                alert('Error al cargar registros de todos los usuarios: ' + error.message);
-            }
-        });
-
-        // Registrar nuevo usuario
-        registerUserBtn.addEventListener('click', async () => {
-            const email = newCedulaInput.value + '@panaderia.com';
-            const password = newPasswordInput.value;
-            const role = newRolSelect.value;
-
-            if (!newCedulaInput.value || !newPasswordInput.value) {
-                alert('Por favor, completa todos los campos.');
-                return;
             }
 
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await setDoc(doc(db, 'users', userCredential.user.uid), {
-                    cedula: newCedulaInput.value,
-                    role: role,
-                    email: email,
-                    userId: userCredential.user.uid
+            async function loadUserRecords(startDate = null, endDate = null) {
+                try {
+                    if (!elements.loading || !elements.recordsSection || !elements.recordsList) return;
+                    elements.loading.classList.remove('hidden');
+                    setVisibility(elements.recordsSection, true);
+                    elements.recordsList.innerHTML = '';
+
+                    let q = query(collection(db, 'timeRecords'), where('userId', '==', auth.currentUser.uid), orderBy('checkIn', 'desc'), limit(10));
+                    if (startDate && endDate) {
+                        q = query(collection(db, 'timeRecords'), where('userId', '==', auth.currentUser.uid), where('checkIn', '>=', startDate), where('checkIn', '<=', endDate), orderBy('checkIn', 'desc'));
+                    }
+
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach(docSnapshot => {
+                        const data = docSnapshot.data();
+                        const checkIn = data.checkIn ? data.checkIn.toDate().toLocaleString() : 'N/A';
+                        const checkOut = data.checkOut ? data.checkOut.toDate().toLocaleString() : 'N/A';
+                        const duration = data.duration || 'N/A';
+                        const li = document.createElement('div');
+                        li.className = 'p-2 bg-gray-100 rounded-md mb-2';
+                        li.innerHTML = `<strong>Entrada:</strong> ${checkIn}<br><strong>Salida:</strong> ${checkOut}<br><strong>Duración:</strong> ${duration}`;
+                        elements.recordsList.appendChild(li);
+                    });
+                } catch (error) {
+                    alert('Error al cargar registros: ' + error.message);
+                } finally {
+                    if (elements.loading) elements.loading.classList.add('hidden');
+                }
+            }
+
+            async function loadUsers() {
+                try {
+                    if (!elements.usersList) return;
+                    elements.usersList.innerHTML = '';
+                    const q = query(collection(db, 'users'), orderBy('cedula'));
+                    const querySnapshot = await getDocs(q);
+
+                    querySnapshot.forEach(docSnapshot => {
+                        const data = docSnapshot.data();
+                        const tenure = data.startDate ? calculateTenure(data.startDate) : 'N/A';
+                        const li = document.createElement('div');
+                        li.className = 'p-2 bg-gray-100 rounded-md mb-2';
+                        li.innerHTML = `<strong>Nombre:</strong> ${data.fullName || 'N/A'}<br><strong>Cédula:</strong> ${data.cedula}<br><strong>Rol:</strong> ${data.role}<br><strong>Email:</strong> ${data.email}<br><strong>Antigüedad:</strong> ${tenure}`;
+                        elements.usersList.appendChild(li);
+                    });
+                } catch (error) {
+                    alert('Error al cargar usuarios: ' + error.message);
+                }
+            }
+
+            async function loadAllRecords(startDate = null, endDate = null) {
+                try {
+                    if (!elements.allRecordsList) return;
+                    elements.allRecordsList.innerHTML = '';
+                    currentRecords = [];
+
+                    let q = query(collection(db, 'timeRecords'), orderBy('checkIn', 'desc'));
+                    if (startDate && endDate) {
+                        q = query(collection(db, 'timeRecords'), where('checkIn', '>=', startDate), where('checkIn', '<=', endDate), orderBy('checkIn', 'desc'));
+                    }
+
+                    const querySnapshot = await getDocs(q);
+
+                    for (const docSnapshot of querySnapshot.docs) {
+                        const data = docSnapshot.data();
+                        const userDoc = await getDoc(doc(db, 'users', data.userId));
+                        const userData = userDoc.exists() ? userDoc.data() : {};
+                        const userCedula = userData.cedula || 'Desconocido';
+                        const userFullName = userData.fullName || 'Desconocido';
+                        const userRole = userData.role || 'Desconocido';
+                        const checkIn = data.checkIn ? data.checkIn.toDate().toLocaleString() : 'N/A';
+                        const checkOut = data.checkOut ? data.checkOut.toDate().toLocaleString() : 'N/A';
+                        const duration = data.duration || 'N/A';
+
+                        const li = document.createElement('div');
+                        li.className = 'p-2 bg-gray-100 rounded-md mb-2';
+                        li.innerHTML = `<strong>Nombre:</strong> ${userFullName}<br><strong>Cédula:</strong> ${userCedula}<br><strong>Rol:</strong> ${userRole}<br><strong>Entrada:</strong> ${checkIn}<br><strong>Salida:</strong> ${checkOut}<br><strong>Duración:</strong> ${duration}`;
+                        elements.allRecordsList.appendChild(li);
+
+                        currentRecords.push({ Nombre: userFullName, Cédula: userCedula, Rol: userRole, Entrada: checkIn, Salida: checkOut, Duración: duration });
+                    }
+                } catch (error) {
+                    alert('Error al cargar registros de todos los usuarios: ' + error.message);
+                }
+            }
+
+            if (elements.loginBtn) {
+                elements.loginBtn.addEventListener('click', async () => {
+                    const cedula = elements.cedulaInput.value.trim();
+                    const password = elements.passwordInput.value.trim();
+
+                    if (!cedula || !password) {
+                        if (elements.errorMessage) {
+                            elements.errorMessage.textContent = 'Por favor, completa todos los campos.';
+                            elements.errorMessage.classList.remove('hidden');
+                        }
+                        return;
+                    }
+
+                    if (!/^\d+$/.test(cedula)) {
+                        if (elements.errorMessage) {
+                            elements.errorMessage.textContent = 'La cédula debe contener solo números.';
+                            elements.errorMessage.classList.remove('hidden');
+                        }
+                        return;
+                    }
+
+                    const email = `${cedula}@panaderia.com`;
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        if (elements.errorMessage) {
+                            elements.errorMessage.textContent = 'El email generado no es válido.';
+                            elements.errorMessage.classList.remove('hidden');
+                        }
+                        return;
+                    }
+
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        await signInWithEmailAndPassword(auth, email, password);
+                        if (elements.errorMessage) elements.errorMessage.classList.add('hidden');
+                    } catch (error) {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                        if (elements.errorMessage) {
+                            elements.errorMessage.textContent = `Error al iniciar sesión: ${error.message}`;
+                            elements.errorMessage.classList.remove('hidden');
+                        }
+                        console.error('Error de inicio de sesión:', error);
+                    }
                 });
-                alert('Usuario registrado correctamente');
-                newCedulaInput.value = '';
-                newPasswordInput.value = '';
-            } catch (error) {
-                alert('Error al registrar usuario: ' + error.message);
             }
-        });
 
-        // Cerrar modal
-        closeModalBtn.addEventListener('click', () => {
-            superAdminModal.classList.add('hidden');
-        });
+            if (elements.checkBtn) {
+                elements.checkBtn.addEventListener('click', async () => {
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        if (!activeCheckInDoc) {
+                            const docRef = await addDoc(collection(db, 'timeRecords'), {
+                                userId: auth.currentUser.uid,
+                                checkIn: new Date(),
+                                checkOut: null,
+                                duration: null
+                            });
+                            const newDoc = await getDoc(doc(db, 'timeRecords', docRef.id));
+                            activeCheckInDoc = newDoc;
+                            elements.checkBtn.textContent = 'Marcar Salida';
+                            elements.checkBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                            elements.checkBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                            updateWorkTime(newDoc.data().checkIn);
+                            alert('Entrada marcada correctamente');
+                        } else {
+                            const checkOutTime = new Date();
+                            const checkInTime = activeCheckInDoc.data().checkIn.toDate();
+                            const diffMs = checkOutTime - checkInTime;
+                            const hours = Math.floor(diffMs / 3600000);
+                            const minutes = Math.floor((diffMs % 3600000) / 60000);
+                            const seconds = Math.floor((diffMs % 60000) / 1000);
+                            const duration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        // Cerrar sesión
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                recordsSection.classList.add('hidden');
-                superAdminModal.classList.add('hidden');
-                alert('Sesión cerrada correctamente');
-            } catch (error) {
-                alert('Error al cerrar sesión: ' + error.message);
+                            await updateDoc(doc(db, 'timeRecords', activeCheckInDoc.id), { checkOut: checkOutTime, duration });
+                            activeCheckInDoc = null;
+                            elements.checkBtn.textContent = 'Marcar Entrada';
+                            elements.checkBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                            elements.checkBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                            setVisibility(elements.workTimeSection, false);
+                            alert('Salida marcada correctamente');
+                        }
+                    } catch (error) {
+                        alert('Error al marcar entrada/salida: ' + error.message);
+                    } finally {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                    }
+                });
             }
-        });
-    </script>
-</body>
+
+            if (elements.viewRecordsBtn) {
+                elements.viewRecordsBtn.addEventListener('click', () => loadUserRecords());
+            }
+
+            if (elements.userFilterRecordsBtn) {
+                elements.userFilterRecordsBtn.addEventListener('click', async () => {
+                    const startDate = elements.userStartDateInput.value ? new Date(elements.userStartDateInput.value) : null;
+                    const endDate = elements.userEndDateInput.value ? new Date(elements.userEndDateInput.value) : null;
+
+                    if (!startDate || !endDate) {
+                        alert('Por favor, selecciona un rango de fechas.');
+                        return;
+                    }
+
+                    endDate.setHours(23, 59, 59, 999);
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        await loadUserRecords(startDate, endDate);
+                    } catch (error) {
+                        alert('Error al filtrar registros: ' + error.message);
+                    } finally {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (elements.filterRecordsBtn) {
+                elements.filterRecordsBtn.addEventListener('click', async () => {
+                    const startDate = elements.startDateInput.value ? new Date(elements.startDateInput.value) : null;
+                    const endDate = elements.endDateInput.value ? new Date(elements.endDateInput.value) : null;
+
+                    if (!startDate || !endDate) {
+                        alert('Por favor, selecciona un rango de fechas.');
+                        return;
+                    }
+
+                    endDate.setHours(23, 59, 59, 999);
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        await loadAllRecords(startDate, endDate);
+                    } catch (error) {
+                        alert('Error al filtrar registros: ' + error.message);
+                    } finally {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (elements.exportRecordsBtn) {
+                elements.exportRecordsBtn.addEventListener('click', () => {
+                    if (currentRecords.length === 0) {
+                        alert('No hay registros para exportar.');
+                        return;
+                    }
+
+                    const ws = XLSX.utils.json_to_sheet(currentRecords);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+                    XLSX.writeFile(wb, 'registros_panaderia.xlsx');
+                });
+            }
+
+            if (elements.logoutBtn) {
+                elements.logoutBtn.addEventListener('click', async () => {
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        await signOut(auth);
+                        setTimeout(() => alert('Sesión cerrada correctamente'), 100);
+                    } catch (error) {
+                        alert('Error al cerrar sesión: ' + error.message);
+                    } finally {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                    }
+                });
+            }
+
+            if (elements.superAdminLogoutBtn) {
+                elements.superAdminLogoutBtn.addEventListener('click', async () => {
+                    try {
+                        if (elements.loading) elements.loading.classList.remove('hidden');
+                        await signOut(auth);
+                        setTimeout(() => alert('Sesión cerrada correctamente'), 100);
+                    } catch (error) {
+                        alert('Error al cerrar sesión: ' + error.message);
+                    } finally {
+                        if (elements.loading) elements.loading.classList.add('hidden');
+                    }
+                });
+            }
+        </script>
+    </body>
 </html>
-```
